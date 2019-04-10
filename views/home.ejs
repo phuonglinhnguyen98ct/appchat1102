@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./stylesheets/home.css">
+    <title>Appchat</title>
+</head>
+
+<body>
+    <div id="container">
+        <div id="appname-login-container">
+            <div id="appchat-container">
+                <div>Appchat</div>
+            </div>
+            <div id="form-login-alert-container">
+                <div id="form-container">
+                    <form action="/login" method="POST">
+                        <div id="login-container">
+                            <div>
+                                <label for="username-login">Username</label>
+                                <br>
+                                <input type="text" id="username-login" name="username" required>
+                            </div>
+                            <div>
+                                <label for="password-login">Password</label>
+                                <br>
+                                <input type="password" id="password-login" name="password" required value="123456">
+                            </div>
+                            <div id="btn-login-container">
+                                <input type="submit" value="Log In" id="btn-login">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <% if(error != '') { %>
+                <div id="msg-login-error">
+                    <%= error %>
+                </div>
+                <% } %>
+                <% if(success_login_msg != '') { %>
+                <div id="msg-login-success">
+                    <%= success_login_msg %>
+                </div>
+                <% } %>
+            </div>
+        </div>
+        <div id="below-login-container">
+            <div id="msg-error-success">
+                <% include ./partials/alert %>
+            </div>
+            <div id="signup-container">
+                <div id="create-acc">Create a new account</div>
+                <form action="/signup" method="POST">
+                    <div>
+                        <input type="name" id="fullname-signup" name="fullnameSignup" placeholder="Full name"
+                            value="<%= typeof fullname != 'undefined' ? fullname : '' %>" required class="signup">
+                    </div>
+                    <div>
+                        <input type="text" id="username-signup" name="usernameSignup" placeholder="Username"
+                            value="<%= typeof username != 'undefined' ? username : '' %>" required class="signup">
+                    </div>
+                    <div>
+                        <input type="password" id="password-signup" name="passwordSignup" placeholder="New password"
+                            value="<%= typeof password != 'undefined' ? password : '' %>" required class="signup">
+                    </div>
+                    <div>
+                        <input type="password" id="password-signup2" name="passwordSignup2"
+                            placeholder="Confirm new password"
+                            value="<%= typeof password2 != 'undefined' ? password2 : '' %>" required class="signup">
+                    </div>
+                    <div>
+                        <input type="submit" value="Sign Up" id="btn-signup" class="signup">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body> 
+</html>

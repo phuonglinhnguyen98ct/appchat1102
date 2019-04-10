@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Message</title>
+    <script src="socket.io/socket.io.js"></script>
+    <script src="./javascript/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="/stylesheets/chat.css">
+    <link rel="stylesheet" href="/stylesheets/fontawesome/css/all.min.css">
+</head>
+
+<body>
+    <div id="container">
+        <div id="left-container">
+            <div id="user-online-title">
+                Online
+            </div>
+            <div id="online-user-container"></div>
+        </div>
+        <div id="right-container">
+            <div id="above-chat-container">
+                <div id="receiver-container"></div>
+                <div class="login-username">
+                    <% if (typeof user != 'undefined') { %>
+                    Hello <b id="login-username"><%= user.username %></b>
+                    <% } %>
+                </div>
+                <div id="menu">
+                    <ul>
+                        <li>
+                            <% if (file) { %>
+                            <img src="/image/<%= file.filename %>" alt="avatar" id="avatar" height="40px">
+                            <% } else { %>
+                            <img src="/images/avatar-icon.png" alt="avatar" id="avatar" height="40px">
+                            <% } %>
+                            <ul class="sub-menu">
+                                <li><a href="/profile/change-avatar"> Change avatar</a></li>
+                                <li><a href="/profile/change-password"> Change password</a></li>
+                                <li><a href="/logout"> Log out</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div id="message-container"></div>
+            <div id="typing-container">
+                <div class="input-container">
+                    <input type="text" id="inp-message" placeholder="Type a message..." autofocus>
+                </div>
+                <div class="input-file">
+                    <label>
+                        <i class="fas fa-paperclip"></i>
+                        <input type="file" accept="image/x-png,image/gif,image/jpeg">
+                    </label>
+                </div>
+                <div id="btn-send-mess-container">
+                    <button id="btn-send-message"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./javascript/chat.js"></script>
+</body>
+
+</html>

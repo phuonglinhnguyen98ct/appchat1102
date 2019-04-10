@@ -1,0 +1,134 @@
+* {
+    font-family: Arial, sans-serif;
+}
+
+#container {
+    display: grid;
+    grid-template-rows: 100px auto;
+    height: 100%;
+}
+
+#appname-login-container {
+    background-color: #3b5998;
+    color: white;
+    display: grid;
+    grid-template-columns: 40% 60%;
+}
+
+html, body{
+    margin: 0px;
+    height: 100%;
+}
+
+#appchat-container {
+    margin-left: 50px;
+    padding: 20px;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 50px;
+}
+
+#login-container {
+    display: grid;
+    grid-template-columns: 200px 200px auto;
+}
+
+#btn-login-container {
+    margin-top: 14px;
+}
+
+#btn-login {
+    cursor: pointer;
+    background-color: #3b5998;
+    border-color: #183bb1d3;
+    color: white;
+    font-weight: bold;
+    width: 80px;
+    padding: 5px;
+}
+
+#form-container {
+    padding: 20px;
+}
+
+#form-login-alert-container {
+    display: grid;
+    grid-template-rows: 70px auto;
+}
+
+#below-login-container {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    background-color: #e9ebee81;
+    padding: 40px;
+}
+
+#create-acc {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.signup {
+    padding: 5px;
+    border: solid 1px #3f7dff;
+    font-size: 20px;
+    margin: 10px;
+    border-radius: 5px;
+    width: 300px;
+    outline: none;
+}
+
+#btn-signup {
+    cursor: pointer;
+    width: 150px;
+    padding: 5px;
+    color: white;
+    font-weight: bold;
+    background-color: #67ae55;
+    border-color: #3b6e22;
+}
+
+.error-msg {
+    margin: 70px 30px 0px 10px;
+    padding-top: 1px;
+    line-height: 30px;
+    background-color: #ff9494;
+    border-radius: 5px;
+    height: fit-content;
+}
+
+.success-msg {
+    margin: 70px 30px 0px 10px;
+    padding-top: 1px;
+    background-color: #5cb85c;
+    text-align: center;
+    border-radius: 5px;
+    height: fit-content;
+    color: white;
+    padding: 20px;
+}
+
+#msg-login-error {
+    background-color: #be4b49;
+    border: solid 1px #8b0300bf;
+    border-radius: 5px;
+    height: fit-content;
+    color: white;
+    width: fit-content;
+    margin-left: 20px;
+    padding: 2px 20px 2px 20px;
+    font-size: 14px;
+}
+
+#msg-login-success {
+    background-color: #5cb85c;
+    border: solid 1px #1d8b1d;
+    border-radius: 5px;
+    height: fit-content;
+    color: white;
+    width: fit-content;
+    margin-left: 20px;
+    padding: 2px 20px 2px 20px;
+    font-size: 14px;
+}
