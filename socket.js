@@ -14,7 +14,7 @@ function socket(io) {
         // Receive client's username
         socket.on('client-send-username', async username => {
 
-            console.log(socket.id + " connected");
+            console.log(username + " connected");
 
             // Storage client's username to socket
             socket.username = username;
@@ -146,7 +146,7 @@ function socket(io) {
 
         // Client disconnect
         socket.on('disconnect', () => {
-            console.log(socket.id + " disconnected");
+            console.log(socket.username + " disconnected");
 
             // Delete user in users[] by username
             users.forEach((user, i) => {

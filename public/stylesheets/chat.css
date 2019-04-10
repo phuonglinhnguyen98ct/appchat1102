@@ -90,10 +90,16 @@ html, body {
     height: calc(100vh - 55px - 40px - 1px - 1px); 
 }
 
+.status-container {
+    background-color: #e6e6e8;
+    border-radius: 20px;
+    width: fit-content;
+    margin-bottom: 5px;
+}
+
 .status-container img {
     border-radius: 20px;
     vertical-align: middle;
-    padding-bottom: 5px;
     height: 38px;
 }
 
