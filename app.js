@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const expressLayouts = require('express-ejs-layouts');
 const bodyParser = require('body-parser');
 const router = require('./routes/index');
 const flash = require('connect-flash');
@@ -15,8 +14,6 @@ const GridFsStorage = require('multer-gridfs-storage');
 const Grid = require('gridfs-stream');
 const methodOverride = require('method-override');
 const path = require('path');
-const { ensureAuthenticated } = require('./config/authenticated');
-const User = require('./apps/models/User');
 
 // EJS
 //app.use(expressLayouts);

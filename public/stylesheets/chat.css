@@ -39,6 +39,8 @@ html, body {
 .online-user {
     padding: 10px;
     font-size: 18px;
+    position: relative;
+    text-align: left;
 }
 
 .online-user:hover {
@@ -298,6 +300,21 @@ html, body {
     height: 30px;
     text-align: left;
     padding-left: 10px;
+}
+
+.waiting-message {
+    background-color: #adffad;
+}
+
+.online-status {
+    background-color: #888888;
+    border: gray;
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    position: absolute;
+    top: 25px;
+    right: 15px;
 }
 
 

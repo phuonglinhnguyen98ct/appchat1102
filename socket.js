@@ -12,36 +12,39 @@ function socket(io) {
         }
 
         // Receive client's username
-        socket.on('client-send-username', async username => {
+        socket.on('client-send-username', username => {
 
             console.log(username + " connected");
 
+            // Load user list from DB
+            let usersDB = [];
+            User.find({}, (err, users) => {
+                if (err) throw err;
+                users.forEach(user => {
+                    usersDB.push({ username: user.username, avatar: user.avatar });
+                });
+
+                // Send to client usersDB
+                socket.emit('send-users-db', usersDB);
+                // Send online users list to client
+                sendOnlineUsers();
+            });
+
             // Storage client's username to socket
             socket.username = username;
-
-            // Get avatar's name from DB
-            let avatar;
-            await User.findOne({ username: username }, (err, user) => {
-                if (err) throw err;
-                avatar = user.avatar;
-            });
 
             // Check user existed
             let check = false;
             for (let i = 0, n = users.length; i < n; i++) {
                 if (users[i].username === username) {
                     users[i].socketId.push(socket.id);
-                    users[i].avatar = avatar;
                     check = true;
                     break;
                 }
             }
             if (!check) {
-                users.push({ username: username, socketId: [socket.id], avatar: avatar });
+                users.push({ username: username, socketId: [socket.id] });
             }
-
-            // Send online users list to client
-            sendOnlineUsers();
         });
 
         // User is typing 
@@ -58,7 +61,7 @@ function socket(io) {
         // Handle stop typing status from client
         socket.on('client-stop-typing', data => {
             users.forEach(user => {
-                if (user.username === data)  {
+                if (user.username === data) {
                     user.socketId.forEach(id => {
                         io.to(id).emit('your-friend-stop-typing');
                     });
@@ -155,8 +158,8 @@ function socket(io) {
                 }
             })
 
-            // Send online users list to client
-            sendOnlineUsers();
+            // Send disconnect username
+            io.sockets.emit('sever-send-disconnect-username', socket.username);
         });
     });
 }

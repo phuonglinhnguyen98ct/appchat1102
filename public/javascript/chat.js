@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3000');
+const socket = io('http://192.168.2.52:3000');
 
 const username = $("#login-username").text();
 let receiver;
@@ -7,9 +7,8 @@ let usernameClicked;
 // Client send username
 socket.emit('client-send-username', username);
 
-// Receive online users
-// let usersOnline;
-socket.on('server-send-online-users', users => {
+// Receive all users
+socket.on('send-users-db', users => {
     $("#online-user-container").empty();
     let clickUser = false; // Check first user online is clicked
 
@@ -17,37 +16,41 @@ socket.on('server-send-online-users', users => {
         // Check user's avatar existed
         if (user.avatar) {
             if (!clickUser) {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user"><img src="/image/${user.avatar}"><span>${user.username}</span></div>`);
-                
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="/image/${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
+
                 // Click on first online user
                 $(".online-user").click();
                 clickUser = true;
             }
             else {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user"><img src="/image/${user.avatar}"><span>${user.username}</span></div>`);
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="/image/${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
             }
         }
         else {
             if (!clickUser) {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user"><img src="/images/avatar-icon.png"><span>${user.username}</span></div>`);
-                
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="/images/avatar-icon.png"><span>${user.username}</span><div class="online-status"></div></div>`);
+
                 // Click on first online user
                 $(".online-user").click();
                 clickUser = true;
             }
             else {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user"><img src="/images/avatar-icon.png"><span>${user.username}</span></div>`);
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="/images/avatar-icon.png"><span>${user.username}</span><div class="online-status"></div></div>`);
             }
         }
     });
+});
 
+// Receive online users
+socket.on('server-send-online-users', users => {
+    users.forEach(user => {
+        $(`[username=${user.username}]`).children('div').css('background-color', '#00E500');
+    });
+});
 
-    // $(".online-user").clear;
-    // usersOnline = $(".online-user");
-
-    // for (let i = 0, n = usersOnline.length; i < n; i++) {
-    //     console.log(usersOnline.get(i));
-    // }
+// Receive disconnect users
+socket.on('sever-send-disconnect-username', username => {
+    $(`[username=${username}]`).children('div').css('background-color', '#888888');
 });
 
 // Client send image
@@ -151,11 +154,11 @@ socket.on('your-friend-is-typing', data => {
         $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
 
         // Set timeout (case client's friend log out...)
-        // setTimeout(() => {
-        //     if ($(".status-container").length > 0) {
-        //         $(".status-container").remove();
-        //     }
-        // }, 10000)
+        setTimeout(() => {
+            if ($(".status-container").length > 0) {
+                $(".status-container").remove();
+            }
+        }, 10000);
 
         // Respone to friend (received typing event)
         socket.emit('client-received-typing-status', data);
@@ -241,7 +244,7 @@ socket.on('client-receive-message', data => {
         }
     }
     else {
-        users = $(".online-user");
+        $(`[username=${data.sender}]`).addClass('waiting-message');
     }
 
 });
@@ -258,7 +261,7 @@ socket.on('client-receive-image', data => {
         }
     }
     else {
-
+        $(`.online-user:contains(${data.sender})`).addClass('waiting-message');
     }
 
 });
@@ -319,6 +322,9 @@ function choosePerson(username, element) {
     $("#receiver-container").text(username);
     $(".online-user").removeClass("active");
     $(element).addClass("active");
+
+    // Seen message
+    $(`[username=${username}]`).removeClass('waiting-message');
 
     // Focus to input-message box
     $("#inp-message").focus();
