@@ -28,6 +28,17 @@ function socket(io) {
                 socket.emit('send-users-db', usersDB);
                 // Send online users list to client
                 sendOnlineUsers();
+
+                // Send waitting messsage's username
+                Message.find({ receiver: socket.username, seen: false }, (err, messageArr) => {
+                        if (err) throw err;
+                        let wattingMessagUsername = [];
+                        messageArr.forEach(message => {
+                            wattingMessagUsername.push(message.sender);
+                        });
+                        socket.emit('server-send-watting-message-username', wattingMessagUsername);
+                        console.log(wattingMessagUsername);
+                    });
             });
 
             // Storage client's username to socket
@@ -71,66 +82,68 @@ function socket(io) {
 
         // User send message
         socket.on('client-send-message', data => {
+            let now = new Date();
+            let dd = String(now.getDate()).padStart(2, '0');
+            let MM = String(now.getMonth() + 1).padStart(2, '0');
+            let yyyy = now.getFullYear();
+            let HH = String(now.getHours()).padStart(2, '0');
+            let mm = String(now.getMinutes()).padStart(2, '0');
+            // Get sent time
+            let datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
+
             users.forEach(user => {
                 if (user.username === data.receiver) {
-                    let now = new Date();
-                    let dd = String(now.getDate()).padStart(2, '0');
-                    let MM = String(now.getMonth() + 1).padStart(2, '0');
-                    let yyyy = now.getFullYear();
-                    let HH = String(now.getHours()).padStart(2, '0');
-                    let mm = String(now.getMinutes()).padStart(2, '0');
-
-                    datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
-
                     // Sending to receiver
                     user.socketId.forEach(id => {
                         io.to(id).emit('client-receive-message', { sender: socket.username, message: data.message, datetime: datetime });
                     });
-
-                    // Saving to MongoDB
-                    Message.create({
-                        sender: socket.username,
-                        receiver: data.receiver,
-                        message: data.message,
-                        datetime: datetime
-                    }, (err) => {
-                        if (err) throw err;
-                    });
                 }
+            });
+
+            // Saving to MongoDB
+            Message.create({
+                sender: socket.username,
+                receiver: data.receiver,
+                message: data.message,
+                datetime: datetime,
+                seen: false
+            }, (err) => {
+                if (err) throw err;
             });
         });
 
         // User send image
         socket.on('client-send-image', data => {
+            let now = new Date();
+            let dd = String(now.getDate()).padStart(2, '0');
+            let MM = String(now.getMonth() + 1).padStart(2, '0');
+            let yyyy = now.getFullYear();
+            let HH = String(now.getHours()).padStart(2, '0');
+            let mm = String(now.getMinutes()).padStart(2, '0');
+            // Get sent time
+            let datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
+
+            // Get send file
+            let base64Image = data.file.toString('base64');
+
             users.forEach(user => {
                 if (user.username === data.receiver) {
-                    // Get send file
-                    let base64Image = data.file.toString('base64');
-
-                    // Get send time
-                    let now = new Date();
-                    let dd = String(now.getDate()).padStart(2, '0');
-                    let MM = String(now.getMonth() + 1).padStart(2, '0');
-                    let yyyy = now.getFullYear();
-                    let HH = String(now.getHours()).padStart(2, '0');
-                    let mm = String(now.getMinutes()).padStart(2, '0');
-                    datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
-
                     // Sending to receiver
                     user.socketId.forEach(id => {
                         io.to(id).emit('client-receive-image', { sender: socket.username, file: base64Image, datetime: datetime });
                     });
-
-                    // Saving to MongoDB
-                    Message.create({
-                        sender: socket.username,
-                        receiver: data.receiver,
-                        file: base64Image,
-                        datetime: datetime
-                    }, (err) => {
-                        if (err) throw err;
-                    });
                 }
+            });
+
+            // Saving to MongoDB
+            Message.create({
+                sender: socket.username,
+                receiver: data.receiver,
+                file: base64Image,
+                datetime: datetime,
+                seen: false
+            }, (err) => {
+                if (err) throw err;
             });
         });
 
@@ -144,6 +157,14 @@ function socket(io) {
                 (err, messageArr) => {
                     if (err) throw err;
                     socket.emit('server-send-old-message', messageArr);
+
+                    // Change seen status
+                    messageArr.forEach(message => {
+                        message.seen = true;
+                        message.save(err => {
+                            if (err) throw err;
+                        });
+                    });
                 });
         });
 

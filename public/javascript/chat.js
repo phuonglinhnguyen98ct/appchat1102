@@ -1,8 +1,7 @@
-const socket = io('http://192.168.2.52:3000');
+const socket = io('http://localhost:3000');
 
 const username = $("#login-username").text();
 let receiver;
-let usernameClicked;
 
 // Client send username
 socket.emit('client-send-username', username);
@@ -189,7 +188,7 @@ $("#btn-send-message").click(() => {
             $("#inp-message").val("");
 
             // Send message to server
-            socket.emit('client-send-message', { receiver, message });
+            socket.emit('client-send-message', { receiver: receiver, message: message });
         }
         // Send image
         if (file) {
@@ -299,6 +298,13 @@ socket.on('server-send-old-message', (data) => {
     $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
 });
 
+// Receive waitting message's username 
+socket.on('server-send-watting-message-username', usernames => {
+    usernames.forEach(username => {
+        $(`[username=${username}]`).addClass('waiting-message');
+    });
+});
+
 // Showing sent datetime when click on message content
 function showDateTime() {
     $(".send-message").on('click', (event) => {
@@ -330,6 +336,6 @@ function choosePerson(username, element) {
     $("#inp-message").focus();
 
     // Get old message from server
-    socket.emit('client-get-old-message', { receiver: username });
+    socket.emit('client-get-old-message', { receiver: receiver });
 }
 

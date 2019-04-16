@@ -303,7 +303,8 @@ html, body {
 }
 
 .waiting-message {
-    background-color: #adffad;
+    background-color: #c6fdc6;
+    font-weight: bold;
 }
 
 .online-status {

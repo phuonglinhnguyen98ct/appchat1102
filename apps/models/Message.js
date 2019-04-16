@@ -5,7 +5,8 @@ const messageSchema = new mongoose.Schema({
     receiver: String,
     message: String,
     file: String,
-    datetime: String
+    datetime: String,
+    seen: Boolean
 });
 
 const Message = mongoose.model('message', messageSchema);
