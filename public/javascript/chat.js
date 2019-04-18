@@ -15,14 +15,14 @@ socket.on('send-users-db', users => {
         // Check user's avatar existed
         if (user.avatar) {
             if (!clickUser) {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="/image/${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="data:image/jpeg;base64,${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
 
                 // Click on first online user
                 $(".online-user").click();
                 clickUser = true;
             }
             else {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="/image/${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="data:image/jpeg;base64,${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
             }
         }
         else {
@@ -158,9 +158,22 @@ socket.on('your-friend-is-typing', data => {
                 $(".status-container").remove();
             }
         }, 10000);
+    }
+});
 
-        // Respone to friend (received typing event)
-        socket.emit('client-received-typing-status', data);
+// Receive SEEN event from server
+socket.on('your-friend-has-seen-your-message', data => {
+    if (data === receiver) {
+        // Delete old seen status
+        if ($(".seen-container").length > 0) {
+            $(".seen-container").remove();
+        }
+
+        // Insert seen status into message box
+        $("#message-container").append(`<div class="seen-container">seen</div>`);
+
+        // Scroll to the bottom of message container 
+        $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
     }
 });
 
@@ -240,12 +253,13 @@ socket.on('client-receive-message', data => {
 
             // Scroll to the bottom of message container 
             $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
+
+            sendSeenStatus(data.sender, username);
         }
     }
     else {
         $(`[username=${data.sender}]`).addClass('waiting-message');
     }
-
 });
 
 // Client receive image
@@ -257,17 +271,35 @@ socket.on('client-receive-image', data => {
 
             // Scroll to the bottom of message container 
             $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
+
+            sendSeenStatus(data.sender, username);
         }
     }
     else {
         $(`.online-user:contains(${data.sender})`).addClass('waiting-message');
     }
+});
 
+// Client receive message from other socketIDs
+socket.on('client-receive-message-from-their-socketids', data => {
+    $("#message-container").append(`<div class="send-message">${data.message}<div class="send-datetime">${data.datetime}</div></div>`);
+    
+    // Scroll to the bottom of message container 
+    $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
+});
+
+// Client receive image from other socketIDs
+socket.on('client-receive-image-from-their-socketids', data => {
+    $("#message-container").append(`<div class="send-image"><img src="data:image/jpeg;base64,${data.file}" height="150px"><div class="send-datetime">${data.datetime}</div></div>`);
+
+    // Scroll to the bottom of message container 
+    $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
 });
 
 // Load old message from server
-socket.on('server-send-old-message', (data) => {
+socket.on('server-send-old-message', data => {
     $("#message-container").empty();
+    let seenStatus = false;
     data.forEach(message => {
         if (message.sender === username) {
             // If message is a text
@@ -278,8 +310,10 @@ socket.on('server-send-old-message', (data) => {
             else {
                 $("#message-container").append(`<div class="send-image"><img src="data:image/jpeg;base64,${message.file}"><div class="send-datetime">${message.datetime}</div></div>`);
             }
+            seenStatus = message.seen;
         }
         else {
+            messageSender = message.sender;
             // If message is a text
             if (message.message) {
                 $("#message-container").append(`<div class="receive-message"><b>${message.sender}: </b>${message.message}<div class="receive-datetime">${message.datetime}</div></div>`);
@@ -288,8 +322,14 @@ socket.on('server-send-old-message', (data) => {
             else {
                 $("#message-container").append(`<div class="receive-image"><div><img src="data:image/jpeg;base64,${message.file}"></div><div class="receive-datetime">${message.datetime}</div></div>`);
             }
+            seenStatus = message.seen;
         }
     });
+
+    if (seenStatus) {
+        // Insert seen status into message box
+        $("#message-container").append(`<div class="seen-container">seen</div>`);
+    }
 
     // Show datetime when click on message content
     showDateTime();
@@ -304,6 +344,10 @@ socket.on('server-send-watting-message-username', usernames => {
         $(`[username=${username}]`).addClass('waiting-message');
     });
 });
+
+function sendSeenStatus(sender, receiver) {
+    socket.emit('client-send-seen-message-status', {sender, receiver});
+}
 
 // Showing sent datetime when click on message content
 function showDateTime() {

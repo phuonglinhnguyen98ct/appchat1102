@@ -31,14 +31,13 @@ function socket(io) {
 
                 // Send waitting messsage's username
                 Message.find({ receiver: socket.username, seen: false }, (err, messageArr) => {
-                        if (err) throw err;
-                        let wattingMessagUsername = [];
-                        messageArr.forEach(message => {
-                            wattingMessagUsername.push(message.sender);
-                        });
-                        socket.emit('server-send-watting-message-username', wattingMessagUsername);
-                        console.log(wattingMessagUsername);
+                    if (err) throw err;
+                    let wattingMessagUsername = [];
+                    messageArr.forEach(message => {
+                        wattingMessagUsername.push(message.sender);
                     });
+                    socket.emit('server-send-watting-message-username', wattingMessagUsername);
+                });
             });
 
             // Storage client's username to socket
@@ -80,6 +79,17 @@ function socket(io) {
             });
         });
 
+        // User have seen message
+        socket.on('client-send-seen-message-status', data => {
+            users.forEach(user => {
+                if (user.username === data.sender) {
+                    user.socketId.forEach(id => {
+                        io.to(id).emit('your-friend-has-seen-your-message', data.receiver);
+                    });
+                }
+            });
+        });
+
         // User send message
         socket.on('client-send-message', data => {
             let now = new Date();
@@ -96,6 +106,14 @@ function socket(io) {
                     // Sending to receiver
                     user.socketId.forEach(id => {
                         io.to(id).emit('client-receive-message', { sender: socket.username, message: data.message, datetime: datetime });
+                    });
+                }
+                // Send to other user's socketId 
+                if (user.username === socket.username) {
+                    user.socketId.forEach(id => {
+                        if (id !== socket.id) {
+                            io.to(id).emit('client-receive-message-from-their-socketids', { message: data.message, datetime: datetime });
+                        }
                     });
                 }
             });
@@ -133,6 +151,14 @@ function socket(io) {
                         io.to(id).emit('client-receive-image', { sender: socket.username, file: base64Image, datetime: datetime });
                     });
                 }
+                // Send to other user's socketId 
+                if (user.username === socket.username) {
+                    user.socketId.forEach(id => {
+                        if (id !== socket.id) {
+                            io.to(id).emit('client-receive-image-from-their-socketids', { file: base64Image, datetime: datetime });
+                        }
+                    });
+                }
             });
 
             // Saving to MongoDB
@@ -166,6 +192,28 @@ function socket(io) {
                         });
                     });
                 });
+        });
+
+        socket.on('client-change-avatar', avatar => {
+            let base64Image = avatar.toString('base64');
+            // Change user's avatar in DB
+            User.findOne({ username: socket.username }, (err, user) => {
+                if (err) throw err;
+                user.avatar = base64Image;
+                user.save(err => {
+                    if (err) throw err;
+                });
+            });
+        })
+
+        socket.on('client-change-fullname', fullname => {
+            User.findOne({ username: socket.username }, (err, user) => {
+                if (err) throw err;
+                user.fullname = fullname;
+                user.save(err => {
+                    if (err) throw err;
+                });
+            });
         });
 
         // Client disconnect

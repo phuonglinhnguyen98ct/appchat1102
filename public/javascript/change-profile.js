@@ -6,12 +6,13 @@ const username = $("#login-username").text();
 socket.emit('client-send-username', username);
 
 // Preview avatar
+let file;
 $('input[type=file]').change(function () {
     if (this.files[0]) {
         console.log(this.files[0]);
         // Check file is image
         if (this.files[0].type !== 'image/png' && this.files[0].type !== 'image/gif' && this.files[0].type !== 'image/jpeg') {
-            $("#btn-apply").attr('disabled', 'disabled');
+            $("#btn-apply-avatar").attr('disabled', 'disabled');
             $("#msg-error-success").empty();
             $("#msg-error-success").append(`<div class="error-msg"><ul><li>The file must be an image</li></ul></div>`);
             // alert("The file must be an image");
@@ -19,16 +20,40 @@ $('input[type=file]').change(function () {
         else {
             // Check file's size 
             if (this.files[0].size >= 4000000) {
-                $("#btn-apply").attr('disabled', 'disabled');
+                $("#btn-apply-avatar").attr('disabled', 'disabled');
                 $("#msg-error-success").empty();
                 $("#msg-error-success").append(`<div class="error-msg"><ul><li>Maximum upload file: 4MB</li></ul></div>`);
                 // alert("Maximum upload file: 4MB");
             }
             else {
+                file = this.files[0];
                 let url = URL.createObjectURL(this.files[0]);
                 $("#img-avatar").attr('src', url);
-                $("#btn-apply").removeAttr('disabled');
+                $("#btn-apply-avatar").removeAttr('disabled');
             }
         }
     }
 });
+
+// Handle change avatar event
+$("#btn-apply-avatar").click(() => {
+    if (file) {
+        socket.emit('client-change-avatar', file);
+        $("#msg-error-success").empty();
+        $("#msg-error-success").append(`<div class="success-msg">Your avatar has been changed!</div>`);
+    }
+});
+
+// Handle change full name event 
+$("#btn-apply-fullname").click(() => {
+    let fullname = $("#fullname").val();
+    if (fullname) {
+        socket.emit('client-change-fullname', fullname);
+        $("#msg-error-success").empty();
+        $("#msg-error-success").append(`<div class="success-msg">Your full name has been changed!</div>`);
+    }
+    else {
+        $("#msg-error-success").empty();
+        $("#msg-error-success").append(`<div class="error-msg"><ul><li>Please fill your full name</li></ul></div>`);
+    }
+})

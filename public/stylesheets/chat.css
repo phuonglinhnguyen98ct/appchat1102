@@ -105,6 +105,16 @@ html, body {
     height: 38px;
 }
 
+.seen-container {
+    border-radius: 20px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: 0;
+    padding: 10px;
+    margin-bottom: 5px;
+    font-style: italic;
+}
+
 #typing-container {
     border-top:  solid 1px #3a37373a;
     display: flex;
