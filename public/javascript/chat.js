@@ -15,26 +15,26 @@ socket.on('send-users-db', users => {
         // Check user's avatar existed
         if (user.avatar) {
             if (!clickUser) {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="data:image/jpeg;base64,${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', '${user.fullname}', this)" class="online-user" username="${user.username}"><img src="data:image/jpeg;base64,${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
 
                 // Click on first online user
                 $(".online-user").click();
                 clickUser = true;
             }
             else {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="data:image/jpeg;base64,${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', '${user.fullname}', this)" class="online-user" username="${user.username}"><img src="data:image/jpeg;base64,${user.avatar}"><span>${user.username}</span><div class="online-status"></div></div>`);
             }
         }
         else {
             if (!clickUser) {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="/images/avatar-icon.png"><span>${user.username}</span><div class="online-status"></div></div>`);
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', '${user.fullname}', this)" class="online-user" username="${user.username}"><img src="/images/avatar-icon.png"><span>${user.username}</span><div class="online-status"></div></div>`);
 
                 // Click on first online user
                 $(".online-user").click();
                 clickUser = true;
             }
             else {
-                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', this)" class="online-user" username="${user.username}"><img src="/images/avatar-icon.png"><span>${user.username}</span><div class="online-status"></div></div>`);
+                $("#online-user-container").append(`<div onclick="choosePerson('${user.username}', '${user.fullname}', this)" class="online-user" username="${user.username}"><img src="/images/avatar-icon.png"><span>${user.username}</span><div class="online-status"></div></div>`);
             }
         }
     });
@@ -170,6 +170,7 @@ socket.on('your-friend-has-seen-your-message', data => {
         }
 
         // Insert seen status into message box
+        console.log("append");
         $("#message-container").append(`<div class="seen-container">seen</div>`);
 
         // Scroll to the bottom of message container 
@@ -313,7 +314,6 @@ socket.on('server-send-old-message', data => {
             seenStatus = message.seen;
         }
         else {
-            messageSender = message.sender;
             // If message is a text
             if (message.message) {
                 $("#message-container").append(`<div class="receive-message"><b>${message.sender}: </b>${message.message}<div class="receive-datetime">${message.datetime}</div></div>`);
@@ -322,12 +322,12 @@ socket.on('server-send-old-message', data => {
             else {
                 $("#message-container").append(`<div class="receive-image"><div><img src="data:image/jpeg;base64,${message.file}"></div><div class="receive-datetime">${message.datetime}</div></div>`);
             }
-            seenStatus = message.seen;
         }
     });
 
     if (seenStatus) {
         // Insert seen status into message box
+        console.log(seenStatus)
         $("#message-container").append(`<div class="seen-container">seen</div>`);
     }
 
@@ -367,9 +367,9 @@ function showDateTime() {
 
 
 // Choose person to send message
-function choosePerson(username, element) {
+function choosePerson(username, fullname, element) {
     receiver = username;
-    $("#receiver-container").text(username);
+    $("#receiver-container").html(`<div>${username}</div><div class="fullname">${fullname}</div>`);
     $(".online-user").removeClass("active");
     $(element).addClass("active");
 
@@ -383,3 +383,30 @@ function choosePerson(username, element) {
     socket.emit('client-get-old-message', { receiver: receiver });
 }
 
+// Handle press add group
+$("#btn-add-group").click(() => {
+    $(".modal").css('display', 'block');
+});
+
+// Handle press exit add group
+$("#btn-exit-add-group").click(() => {
+    $(".modal").css('display', 'none');
+});
+
+// Handle press outside add group form to exit
+$(window).click((e) => {
+    if (e.target.className === 'modal') {
+        $(".modal").css('display', 'none');
+    }
+});
+
+// Get user list to create group
+socket.on('send-users-db', users => {
+    $(".user-container").empty();
+
+    users.forEach(user => {
+        if (user.username !== username) {
+            $(".user-container").append(`<div class="user-group"><input type="checkbox" name="userInGroup[]" value="${user.username}">${user.username}</input></div>`);
+        }
+    });
+});

@@ -18,7 +18,7 @@ app.set('views', './views');
 app.use(methodOverride('_method'));
 
 // Bodyparser
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Express Session
@@ -55,7 +55,7 @@ server.listen(3000, () => {
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/nienluancoso', {useNewUrlParser: true}, (err) => {
     if (err) throw err;
-    console.log('MongoDB Connected');
+    console.log('MongoDB connected...');
 });
 
 // SocketIO

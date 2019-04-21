@@ -6,4 +6,20 @@ router.get('/', (req, res) => {
     });
 });
 
+router.get('/video-call', (req, res) => {
+    res.render('video-call', {
+        user: req.user
+    })
+});
+
+router.post('/add-group', (req, res) => {
+    let userInGroup = req.body.userInGroup;
+    if (userInGroup) {
+        userInGroup.forEach(user => {
+            console.log(user);
+        });
+    }
+    res.redirect('/chat');
+});
+
 module.exports = router;

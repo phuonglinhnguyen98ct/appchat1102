@@ -7,6 +7,7 @@
     <script src="./javascript/jquery-3.3.1.min.js"></script>
     <link rel="stylesheet" href="/stylesheets/chat.css">
     <link rel="stylesheet" href="/stylesheets/fontawesome/css/all.min.css">
+    <link rel="shortcut icon" href="./images/appchat-icon.png" type="image/ico">
 </head>
 
 <body>
@@ -16,6 +17,38 @@
                 Appchat
             </div>
             <div id="online-user-container"></div>
+            <div>
+                <div class="group-title">
+                    <i class="fas fa-users"></i>
+                    <i class="fas fa-plus" id="btn-add-group"></i>
+                </div>
+                <div class="chat-group-container">
+                    <div class="chat-group">
+                        Group 1
+                    </div>
+                    <div class="chat-group">
+                        Group 2
+                    </div>
+                    <div class="chat-group">
+                        Group 3
+                    </div>
+                    <div class="chat-group">
+                        Group 4
+                    </div>
+                    <div class="chat-group">
+                        Group 5
+                    </div>
+                    <div class="chat-group">
+                        Group 6
+                    </div>
+                    <div class="chat-group">
+                        Group 7
+                    </div>
+                    <div class="chat-group">
+                        Group 8
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="right-container">
             <div id="above-chat-container">
@@ -46,14 +79,35 @@
                 <div class="input-container">
                     <input type="text" id="inp-message" placeholder="Type a message..." autofocus>
                 </div>
+                <!-- <div>
+                    <a href="chat/video-call" target="_blank"><i class="fas fa-video" id="call-video"></i></a>
+                </div> -->
                 <div class="input-file">
                     <label>
-                        <i class="fas fa-paperclip"></i>
+                        <i class="far fa-image"></i>
                         <input type="file" accept="image/x-png,image/gif,image/jpeg">
                     </label>
                 </div>
                 <div id="btn-send-mess-container">
                     <button id="btn-send-message"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="modal">
+            <div class="add-group-container">
+                <div class="create-new-group-title">Create new group</div>
+                <div id="btn-exit-add-group">&times;</div>
+                <div class="add-group-form-container">
+                    <form action="/chat/add-group" method="POST">
+                        <div class="user-container"></div>
+                        <div class="group-name-container">
+                            <label for="groupName">Group name:</label>
+                            <input type="text" name="groupName" id="inp-group-name">
+                        </div>
+                        <div>
+                            <input type="submit" value="Create" id="btn-apply-group">
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

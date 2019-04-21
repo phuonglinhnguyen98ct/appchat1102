@@ -21,7 +21,7 @@ function socket(io) {
             User.find({}, (err, users) => {
                 if (err) throw err;
                 users.forEach(user => {
-                    usersDB.push({ username: user.username, avatar: user.avatar });
+                    usersDB.push({ username: user.username, fullname: user.fullname, avatar: user.avatar });
                 });
 
                 // Send to client usersDB
@@ -79,15 +79,20 @@ function socket(io) {
             });
         });
 
-        // User have seen message
-        socket.on('client-send-seen-message-status', data => {
+        // Send seen status to user's friend - receiver is seen user  
+        function userSeenMessage(sender, receiver) {
             users.forEach(user => {
-                if (user.username === data.sender) {
+                if (user.username === sender) {
                     user.socketId.forEach(id => {
-                        io.to(id).emit('your-friend-has-seen-your-message', data.receiver);
+                        io.to(id).emit('your-friend-has-seen-your-message', receiver);
                     });
                 }
             });
+        }
+
+        // User have seen message
+        socket.on('client-send-seen-message-status', data => {
+            userSeenMessage(data.sender, data.receiver);
         });
 
         // User send message
@@ -173,7 +178,7 @@ function socket(io) {
             });
         });
 
-        // Load message from MongoDB
+        // Load old message from MongoDB
         socket.on('client-get-old-message', (data) => {
             Message.find({
                 $or: [
@@ -186,14 +191,21 @@ function socket(io) {
 
                     // Change seen status
                     messageArr.forEach(message => {
-                        message.seen = true;
-                        message.save(err => {
-                            if (err) throw err;
-                        });
+                        if (message.receiver === socket.username) {
+                            message.seen = true;
+                            message.save(err => {
+                                if (err) throw err;
+                            });
+                        }
+
+                        // Send seen status to friend
+                        // At the client side, receiver is sender when client load old message
+                        userSeenMessage(data.receiver, socket.username);
                     });
                 });
         });
 
+        // Change avatar
         socket.on('client-change-avatar', avatar => {
             let base64Image = avatar.toString('base64');
             // Change user's avatar in DB
@@ -206,6 +218,7 @@ function socket(io) {
             });
         })
 
+        // Change full name
         socket.on('client-change-fullname', fullname => {
             User.findOne({ username: socket.username }, (err, user) => {
                 if (err) throw err;

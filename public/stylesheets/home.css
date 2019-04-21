@@ -9,7 +9,7 @@
 }
 
 #appname-login-container {
-    background-color: #3b5998;
+    background-color: #001935;
     color: white;
     display: grid;
     grid-template-columns: 40% 60%;
@@ -39,12 +39,12 @@ html, body{
 
 #btn-login {
     cursor: pointer;
-    background-color: #3b5998;
-    border-color: #183bb1d3;
-    color: white;
+    background-color: #96a0ab;
+    border-color: #1c324b;
     font-weight: bold;
     width: 80px;
     padding: 5px;
+    color: #1c324b;
 }
 
 #form-container {
