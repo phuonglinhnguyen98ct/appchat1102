@@ -170,7 +170,6 @@ socket.on('your-friend-has-seen-your-message', data => {
         }
 
         // Insert seen status into message box
-        console.log("append");
         $("#message-container").append(`<div class="seen-container">seen</div>`);
 
         // Scroll to the bottom of message container 
@@ -182,7 +181,7 @@ socket.on('your-friend-has-seen-your-message', data => {
 $("#btn-send-message").click(() => {
     let message = $("#inp-message").val().trim();
     if (receiver === "") {
-        alert("Please select a person before chatting");
+        // alert("Please select a person before chatting");
     }
     else {
         // Send text
@@ -277,14 +276,14 @@ socket.on('client-receive-image', data => {
         }
     }
     else {
-        $(`.online-user:contains(${data.sender})`).addClass('waiting-message');
+        $(`[username=${data.sender}]`).addClass('waiting-message');
     }
 });
 
 // Client receive message from other socketIDs
 socket.on('client-receive-message-from-their-socketids', data => {
     $("#message-container").append(`<div class="send-message">${data.message}<div class="send-datetime">${data.datetime}</div></div>`);
-    
+
     // Scroll to the bottom of message container 
     $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
 });
@@ -297,7 +296,7 @@ socket.on('client-receive-image-from-their-socketids', data => {
     $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
 });
 
-// Load old message from server
+// Load old message from server (with a friend)
 socket.on('server-send-old-message', data => {
     $("#message-container").empty();
     let seenStatus = false;
@@ -327,7 +326,6 @@ socket.on('server-send-old-message', data => {
 
     if (seenStatus) {
         // Insert seen status into message box
-        console.log(seenStatus)
         $("#message-container").append(`<div class="seen-container">seen</div>`);
     }
 
@@ -346,7 +344,7 @@ socket.on('server-send-watting-message-username', usernames => {
 });
 
 function sendSeenStatus(sender, receiver) {
-    socket.emit('client-send-seen-message-status', {sender, receiver});
+    socket.emit('client-send-seen-message-status', { sender, receiver });
 }
 
 // Showing sent datetime when click on message content
@@ -368,8 +366,14 @@ function showDateTime() {
 
 // Choose person to send message
 function choosePerson(username, fullname, element) {
+    // Delete receiveGroup's id
+    receivedGroupId = "";
+
+    // Get receiver's name
     receiver = username;
+
     $("#receiver-container").html(`<div>${username}</div><div class="fullname">${fullname}</div>`);
+    $(".chat-group").removeClass("active");
     $(".online-user").removeClass("active");
     $(element).addClass("active");
 
@@ -406,7 +410,234 @@ socket.on('send-users-db', users => {
 
     users.forEach(user => {
         if (user.username !== username) {
+            // Insert into user list to add group 
             $(".user-container").append(`<div class="user-group"><input type="checkbox" name="userInGroup[]" value="${user.username}">${user.username}</input></div>`);
         }
+        // Insert into user list to edit group 
+        $(".user-container-to-edit").append(`<div class="user-group"><input type="checkbox" name="userInGroup[]" edit-user-value="${user.username}">${user.username}</input></div>`);
     });
+});
+
+// Receive chat groups from server
+socket.on('sever-send-chat-groups', groups => {
+    groups.forEach(group => {
+        groupMembersString = group.members.join("---&&*&&*%%*%%---");
+        $(".chat-group-container").append(`<div class="chat-group" groupId="${group._id}" onclick="chooseGroup('${group.name}', '${group._id}', '${group.creator}', '${groupMembersString}', this)">${group.name}</div>`);
+    });
+});
+
+let receivedGroupId;
+
+// Choose group to chat
+function chooseGroup(groupName, groupId, groupCreator, groupMembersString, element) {
+    // Delete receiver name
+    receiver = "";
+
+    groupMembers = groupMembersString.split("---&&*&&*%%*%%---");
+
+    // Get receiverGroup name
+    receivedGroupId = groupId;
+
+    // Check user is group's creator
+    if (username === groupCreator) {
+        $("#receiver-container").html(`<div>${groupName}<i class="fas fa-cog" id="btn-edit-group"></i></div><div class="group-id">ID: ${groupId}</div>`);
+    }
+    else {
+        $("#receiver-container").html(`<div>${groupName}</div><div class="group-id">ID: ${groupId}</div>`);
+    }
+
+    // Show group's members
+    $(`[checked=checked]`).attr('checked', false);
+    groupMembers.forEach(member => {
+        $(`[edit-user-value=${member}]`).attr('checked', 'true');
+    });
+
+    $(".online-user").removeClass("active");
+    $(".chat-group").removeClass("active");
+    $(element).addClass("active");
+
+    // Seen message
+    $(`[groupId=${groupId}]`).removeClass('waiting-message');
+
+    // Delete message in message box
+    $("#message-container").empty();
+
+    // Focus to input-message box
+    $("#inp-message").focus();
+
+    // Get old message from server
+    socket.emit('client-get-old-message-with-group', { receivedGroupId: receivedGroupId });
+}
+
+// Client send message to group
+$("#btn-send-message").click(() => {
+    let message = $("#inp-message").val().trim();
+    if (receivedGroupId === "") {
+        // alert("Please select a person before chatting");
+    }
+    else {
+        // Send text
+        if (message) {
+            let now = new Date();
+            let dd = String(now.getDate()).padStart(2, '0');
+            let MM = String(now.getMonth() + 1).padStart(2, '0');
+            let yyyy = now.getFullYear();
+            let HH = String(now.getHours()).padStart(2, '0');
+            let mm = String(now.getMinutes()).padStart(2, '0');
+
+            datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
+            // Showing immediately to message container 
+            $("#message-container").append(`<div class="send-message">${message}<div class="send-datetime">${datetime}</div></div>`);
+
+            // Delete text in inp-message
+            $("#inp-message").val("");
+
+            // Send message to server
+            socket.emit('client-send-message-to-group', { receivedGroupId: receivedGroupId, message: message });
+        }
+        // Send image
+        if (file) {
+            // Delete image into message input
+            $(".input-container img").remove();
+            $(".input-container i").remove();
+
+            // Abled input file
+            $(".input-file label input").removeAttr('disabled');
+
+            // Refresh input file
+            $(".input-file label input").val("");
+
+            // Set margin-top of insert file button and send button
+            $(".input-file").css('margin-top', "0px");
+            $("#btn-send-mess-container").css('margin-top', "0px");
+
+            // Set height of message container
+            $("#message-container").innerHeight($("#message-container").innerHeight() + 80);
+
+            // Showing immediately to message container 
+            let url = URL.createObjectURL(file);
+            $("#message-container").append(`<div class="send-image"><img src="${url}" height="150px"></div>`);
+
+            // Send image to server
+            socket.emit('client-send-image-to-group', { receivedGroupId: receivedGroupId, file: file });
+
+            // Delete temperature file (image)
+            file = "";
+        }
+    }
+    // Scroll to the bottom of message container 
+    $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
+});
+
+// Receive message from client's groups
+socket.on('client-receive-message-from-group', data => {
+    if (data.receivedGroupId === receivedGroupId) {
+        // Case: receive from other user's socket
+        if (username === data.sender) {
+            $("#message-container").append(`<div class="send-message">${data.message}<div class="send-datetime">${data.datetime}</div></div>`);
+
+            // Scroll to the bottom of message container 
+            $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
+
+            // sendSeenStatus(data.sender, username);
+        }
+        else {
+            $("#message-container").append(`<div class="receive-message"><b>${data.sender}: </b>${data.message}<div class="receive-datetime">${data.datetime}</div></div>`);
+
+            // Scroll to the bottom of message container 
+            $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
+
+            // sendSeenStatus(data.sender, username);
+        }
+    }
+    else {
+        $(`[groupId=${data.receivedGroupId}]`).addClass('waiting-message');
+    }
+});
+
+// Client receive image from client's groups
+socket.on('client-receive-image-from-group', data => {
+    if (data.receivedGroupId === receivedGroupId) {
+        // Case: receive from other user's socket
+        if (username === data.sender) {
+            $("#message-container").append(`<div class="send-image"><div><img src="data:image/jpeg;base64,${data.file}"></div><div class="send-datetime">${data.datetime}</div></div>`);
+
+            // Scroll to the bottom of message container 
+            $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
+
+            // sendSeenStatus(data.sender, username);
+        }
+        else {
+            $("#message-container").append(`<div class="receive-image"><div><div><b>${data.sender}: </b></div><img src="data:image/jpeg;base64,${data.file}"></div><div class="receive-datetime">${data.datetime}</div></div>`);
+
+            // Scroll to the bottom of message container 
+            $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
+
+            // sendSeenStatus(data.sender, username);
+        }
+    }
+    else {
+        $(`[groupId=${data.receivedGroupId}]`).addClass('waiting-message');
+    }
+});
+
+// Load old message from server (with a group)
+socket.on('server-send-old-message-with-group', data => {
+    $("#message-container").empty();
+    let seenStatus = false;
+    data.forEach(message => {
+        if (message.sender === username) {
+            // If message is a text
+            if (message.message) {
+                $("#message-container").append(`<div class="send-message">${message.message}<div class="send-datetime">${message.datetime}</div></div>`);
+            }
+            // If message is a image
+            else {
+                $("#message-container").append(`<div class="send-image"><img src="data:image/jpeg;base64,${message.file}"><div class="send-datetime">${message.datetime}</div></div>`);
+            }
+            seenStatus = message.seen;
+        }
+        else {
+            // If message is a text
+            if (message.message) {
+                $("#message-container").append(`<div class="receive-message"><b>${message.sender}: </b>${message.message}<div class="receive-datetime">${message.datetime}</div></div>`);
+            }
+            // If message is a image
+            else {
+                $("#message-container").append(`<div class="receive-image"><div><div><b>${message.sender}: </b></div><img src="data:image/jpeg;base64,${message.file}"></div><div class="receive-datetime">${message.datetime}</div></div>`);
+            }
+        }
+    });
+
+    // if (seenStatus) {
+    //     // Insert seen status into message box
+    //     $("#message-container").append(`<div class="seen-container">seen</div>`);
+    // }
+
+    // Show datetime when click on message content
+    showDateTime();
+
+    // Scroll to the bottom of message container 
+    $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
+});
+
+// Handle press edit group
+$(document).on('click', '#btn-edit-group', () => {
+    $(".edit-group").css('display', 'block');
+});
+
+// $("#receiver-container div i").click(() => {
+
+// });
+
+// Handle press exit edit group
+$("#btn-exit-edit-group").click(() => {
+    $(".edit-group").css('display', 'none');
+});
+
+// Handle press outside add group form to exit
+$(window).click((e) => {
+    if (e.target.className === 'edit-group') {
+        $(".edit-group").css('display', 'none');
+    }
 });

@@ -22,32 +22,7 @@
                     <i class="fas fa-users"></i>
                     <i class="fas fa-plus" id="btn-add-group"></i>
                 </div>
-                <div class="chat-group-container">
-                    <div class="chat-group">
-                        Group 1
-                    </div>
-                    <div class="chat-group">
-                        Group 2
-                    </div>
-                    <div class="chat-group">
-                        Group 3
-                    </div>
-                    <div class="chat-group">
-                        Group 4
-                    </div>
-                    <div class="chat-group">
-                        Group 5
-                    </div>
-                    <div class="chat-group">
-                        Group 6
-                    </div>
-                    <div class="chat-group">
-                        Group 7
-                    </div>
-                    <div class="chat-group">
-                        Group 8
-                    </div>
-                </div>
+                <div class="chat-group-container"></div>
             </div>
         </div>
         <div id="right-container">
@@ -102,10 +77,28 @@
                         <div class="user-container"></div>
                         <div class="group-name-container">
                             <label for="groupName">Group name:</label>
-                            <input type="text" name="groupName" id="inp-group-name">
+                            <input type="text" name="groupName" id="inp-group-name" required>
                         </div>
                         <div>
                             <input type="submit" value="Create" id="btn-apply-group">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="edit-group">
+            <div class="edit-group-container">
+                <div class="create-new-group-title">Edit group<i class="fas fa-trash-alt"></i></div>
+                <div id="btn-exit-edit-group">&times;</div>
+                <div class="add-group-form-container">
+                    <form action="/chat/add-group" method="POST">
+                        <div class="user-container-to-edit"></div>
+                        <div class="group-name-container">
+                            <label for="groupName">Group name:</label>
+                            <input type="text" name="groupName" id="inp-group-name">
+                        </div>
+                        <div>
+                            <input type="submit" value="Apply" id="btn-apply-edit-group">
                         </div>
                     </form>
                 </div>

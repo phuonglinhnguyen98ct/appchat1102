@@ -1,5 +1,6 @@
 const User = require('./apps/models/User');
 const Message = require('./apps/models/Message');
+const Group = require('./apps/models/Group');
 
 function socket(io) {
     const users = [];
@@ -39,6 +40,24 @@ function socket(io) {
                     socket.emit('server-send-watting-message-username', wattingMessagUsername);
                 });
             });
+
+            // Load client's groups from DB
+            User.findOne({ username: username }, (err, user) => {
+                if (err) throw err;
+                if (user.groupIds) {
+                    Group.find({ _id: { $in: user.groupIds } }, (err, groups) => {
+                        if (err) throw err;
+                        // Send client's groups to client
+                        socket.emit('sever-send-chat-groups', groups);
+                    });
+
+                    // Add user to room socketIO
+                    user.groupIds.forEach(groupId => {
+                        socket.join(groupId);
+                    });
+                }
+            });
+
 
             // Storage client's username to socket
             socket.username = username;
@@ -90,21 +109,28 @@ function socket(io) {
             });
         }
 
-        // User have seen message
-        socket.on('client-send-seen-message-status', data => {
-            userSeenMessage(data.sender, data.receiver);
-        });
-
-        // User send message
-        socket.on('client-send-message', data => {
+        // Get datetime string
+        function getDatetimeString() {
             let now = new Date();
             let dd = String(now.getDate()).padStart(2, '0');
             let MM = String(now.getMonth() + 1).padStart(2, '0');
             let yyyy = now.getFullYear();
             let HH = String(now.getHours()).padStart(2, '0');
             let mm = String(now.getMinutes()).padStart(2, '0');
-            // Get sent time
             let datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
+
+            return datetime;
+        }
+
+        // User have seen message
+        socket.on('client-send-seen-message-status', data => {
+            userSeenMessage(data.sender, data.receiver);
+        });
+
+        // User send message to a friend
+        socket.on('client-send-message', data => {
+            // Get sent time
+            let datetime = getDatetimeString();
 
             users.forEach(user => {
                 if (user.username === data.receiver) {
@@ -135,16 +161,10 @@ function socket(io) {
             });
         });
 
-        // User send image
+        // User send image to a friend
         socket.on('client-send-image', data => {
-            let now = new Date();
-            let dd = String(now.getDate()).padStart(2, '0');
-            let MM = String(now.getMonth() + 1).padStart(2, '0');
-            let yyyy = now.getFullYear();
-            let HH = String(now.getHours()).padStart(2, '0');
-            let mm = String(now.getMinutes()).padStart(2, '0');
             // Get sent time
-            let datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
+            let datetime = getDatetimeString();
 
             // Get send file
             let base64Image = data.file.toString('base64');
@@ -178,7 +198,7 @@ function socket(io) {
             });
         });
 
-        // Load old message from MongoDB
+        // Load old message with a friend from MongoDB
         socket.on('client-get-old-message', (data) => {
             Message.find({
                 $or: [
@@ -203,6 +223,71 @@ function socket(io) {
                         userSeenMessage(data.receiver, socket.username);
                     });
                 });
+        });
+
+        // Client send message to group
+        socket.on('client-send-message-to-group', data => {
+            // Get sent time
+            let datetime = getDatetimeString();
+
+            // Send to room socketIO
+            socket.to(data.receivedGroupId).emit('client-receive-message-from-group', { sender: socket.username, receivedGroupId: data.receivedGroupId, message: data.message, datetime: datetime });
+
+            // Saving to MongoDB
+            Message.create({
+                sender: socket.username,
+                receivedGroupId: data.receivedGroupId,
+                message: data.message,
+                datetime: datetime,
+                seen: false
+            }, (err) => {
+                if (err) throw err;
+            });
+        });
+
+        // User send image to group
+        socket.on('client-send-image-to-group', data => {
+            // Get sent time
+            let datetime = getDatetimeString();
+
+            // Get send file
+            let base64Image = data.file.toString('base64');
+
+            // Send to room socketIO
+            socket.to(data.receivedGroupId).emit('client-receive-image-from-group', { sender: socket.username, receivedGroupId: data.receivedGroupId, file: base64Image, datetime: datetime });
+
+            // Saving to MongoDB
+            Message.create({
+                sender: socket.username,
+                receivedGroupId: data.receivedGroupId,
+                file: base64Image,
+                datetime: datetime,
+                seen: false
+            }, (err) => {
+                if (err) throw err;
+            });
+        });
+
+        // Load old message with a group from MongoDB
+        socket.on('client-get-old-message-with-group', (data) => {
+            Message.find({ receivedGroupId: data.receivedGroupId }, (err, messageArr) => {
+                if (err) throw err;
+                socket.emit('server-send-old-message-with-group', messageArr);
+
+                // Change seen status
+                messageArr.forEach(message => {
+                    if (message.receiver === socket.username) {
+                        message.seen = true;
+                        message.save(err => {
+                            if (err) throw err;
+                        });
+                    }
+
+                    // Send seen status to friend
+                    // At the client side, receiver is sender when client load old message
+                    // userSeenMessage(data.receiver, socket.username);
+                });
+            });
         });
 
         // Change avatar
