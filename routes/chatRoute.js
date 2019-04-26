@@ -48,9 +48,76 @@ router.post('/add-group', async (req, res) => {
         });
     });
 
+    res.redirect('/chat');
+});
+
+// Edit group's mem
+router.post('/edit-group', async (req, res) => {
+    let newUserInGroup = req.body.userInGroup;
+    newUserInGroup.push(req.user.username);
+    let oldUserInGroup;
+
+    await Group.findOne({ _id: req.body.groupId }, (err, group) => {
+        if (err) throw err;
+        // Get old members
+        oldUserInGroup = group.members.slice();
+
+        // Change group's name
+        if (req.body.groupName) {
+            group.name = req.body.groupName;
+        }
+
+        // Save new members into DB
+        group.members = newUserInGroup.slice();
+        group.save();
+    });
+
+    // Delete old groupId when user leave group
+    await User.find({
+        $and: [
+            { username: { $in: oldUserInGroup } },
+            { username: { $nin: newUserInGroup } }]
+    }, (err, users) => {
+        if (err) throw err;
+        users.forEach(user => {
+            user.groupIds.forEach((groupId, index) => {
+                if (groupId == req.body.groupId) {
+                    // Delete groupId
+                    user.groupIds.splice(index, 1);
+                    user.save();
+                }
+            });
+        });
+    });
+
+    // Insert groupId when user join in group
+    await User.find({
+        $and: [
+            { username: { $in: newUserInGroup } },
+            { username: { $nin: oldUserInGroup } }]
+    }, (err, users) => {
+        if (err) throw err;
+        users.forEach(user => {
+            user.groupIds.push(req.body.groupId);
+            user.save();
+        });
+    });
 
 
     res.redirect('/chat');
 });
+
+// router.post('/delete-all-groupId-in-user-model', (req, res) => {
+//     User.find({}, (err, users) => {
+//         if (err) throw err;
+//         let arr = [];
+//         users.forEach(user => {
+//             user.groupIds = arr;
+//             user.save();
+//         });
+//     });
+//     console.log("deleted all groupId in users model");
+//     res.redirect('/chat');
+// });
 
 module.exports = router;

@@ -88,16 +88,17 @@
         </div>
         <div class="edit-group">
             <div class="edit-group-container">
-                <div class="create-new-group-title">Edit group<i class="fas fa-trash-alt"></i></div>
+                <div class="create-new-group-title">Edit group<i class="fas fa-trash-alt"></i><div class="group-creator"></div></div>
                 <div id="btn-exit-edit-group">&times;</div>
                 <div class="add-group-form-container">
-                    <form action="/chat/add-group" method="POST">
+                    <form action="/chat/edit-group" method="POST">
                         <div class="user-container-to-edit"></div>
                         <div class="group-name-container">
                             <label for="groupName">Group name:</label>
                             <input type="text" name="groupName" id="inp-group-name">
                         </div>
                         <div>
+                            <input type="text" class="group-id" name="groupId">
                             <input type="submit" value="Apply" id="btn-apply-edit-group">
                         </div>
                     </form>

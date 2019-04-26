@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const groupSchema = new mongoose.Schema({
     name: String,
     creator: String,
-    members: Array,
+    members: [String],
     datetime: String,
 });
 

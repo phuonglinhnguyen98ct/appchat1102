@@ -486,6 +486,7 @@ input[type="checkbox"] {
 #inp-group-name {
     padding: 5px;
     border-radius: 5px;
+    font-size: 18px;
 }
 
 #btn-apply-group {
@@ -517,7 +518,7 @@ input[type="checkbox"] {
 
 .edit-group-container {
     width: 50%;
-    height: 60%;
+    height: 65%;
     background-color: #f1f1f1;
     margin: 10% auto;
     position: relative;
@@ -556,4 +557,9 @@ input[type="checkbox"] {
     background-color: #67ae55;
     font-size: 18px;
     cursor: pointer;
+}
+
+.group-creator {
+    font-weight: normal;
+    font-size: 18px;
 }

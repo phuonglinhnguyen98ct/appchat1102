@@ -389,6 +389,7 @@ function choosePerson(username, fullname, element) {
 
 // Handle press add group
 $("#btn-add-group").click(() => {
+    $('input').filter(':checkbox').prop('checked', false);
     $(".modal").css('display', 'block');
 });
 
@@ -412,9 +413,9 @@ socket.on('send-users-db', users => {
         if (user.username !== username) {
             // Insert into user list to add group 
             $(".user-container").append(`<div class="user-group"><input type="checkbox" name="userInGroup[]" value="${user.username}">${user.username}</input></div>`);
+            // Insert into user list to edit group 
+            $(".user-container-to-edit").append(`<div class="user-group"><input type="checkbox" name="userInGroup[]" edit-user-value="${user.username}" value="${user.username}">${user.username}</input></div>`);
         }
-        // Insert into user list to edit group 
-        $(".user-container-to-edit").append(`<div class="user-group"><input type="checkbox" name="userInGroup[]" edit-user-value="${user.username}">${user.username}</input></div>`);
     });
 });
 
@@ -427,13 +428,16 @@ socket.on('sever-send-chat-groups', groups => {
 });
 
 let receivedGroupId;
+let groupMembers; // group's members to edit
 
 // Choose group to chat
 function chooseGroup(groupName, groupId, groupCreator, groupMembersString, element) {
     // Delete receiver name
     receiver = "";
 
-    groupMembers = groupMembersString.split("---&&*&&*%%*%%---");
+    if (groupMembersString) {
+        groupMembers = groupMembersString.split("---&&*&&*%%*%%---");
+    }
 
     // Get receiverGroup name
     receivedGroupId = groupId;
@@ -445,12 +449,12 @@ function chooseGroup(groupName, groupId, groupCreator, groupMembersString, eleme
     else {
         $("#receiver-container").html(`<div>${groupName}</div><div class="group-id">ID: ${groupId}</div>`);
     }
+    
+    // Insert groupId into edit group form
+    $(".group-id").val(groupId);
 
-    // Show group's members
-    $(`[checked=checked]`).attr('checked', false);
-    groupMembers.forEach(member => {
-        $(`[edit-user-value=${member}]`).attr('checked', 'true');
-    });
+    // Insert groupCreator into edit group form
+    $(".group-creator").html(`<b>Creator:</b> ${groupCreator}`);
 
     $(".online-user").removeClass("active");
     $(".chat-group").removeClass("active");
@@ -624,11 +628,13 @@ socket.on('server-send-old-message-with-group', data => {
 // Handle press edit group
 $(document).on('click', '#btn-edit-group', () => {
     $(".edit-group").css('display', 'block');
+
+    // Show group's members
+    $('input').filter(':checkbox').prop('checked', false);
+    groupMembers.forEach(member => {
+        $(`[edit-user-value=${member}]`).prop('checked', true);
+    });
 });
-
-// $("#receiver-container div i").click(() => {
-
-// });
 
 // Handle press exit edit group
 $("#btn-exit-edit-group").click(() => {
