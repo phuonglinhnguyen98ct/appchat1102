@@ -88,7 +88,7 @@
         </div>
         <div class="edit-group">
             <div class="edit-group-container">
-                <div class="create-new-group-title">Edit group<i class="fas fa-trash-alt"></i><div class="group-creator"></div></div>
+                <div class="create-new-group-title">Edit group<i class="fas fa-trash-alt" id="btn-delete-group"></i><div class="group-creator"></div></div>
                 <div id="btn-exit-edit-group">&times;</div>
                 <div class="add-group-form-container">
                     <form action="/chat/edit-group" method="POST">
@@ -103,6 +103,16 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+        <div class="delete-group-modal">
+            <div class="delete-group-container">
+                <form action="/chat/delete-group" method="POST">
+                    <div class="delete-group-title">Are you sure you want to delete this group?</div>
+                    <input type="text" class="group-id" name="groupId">
+                    <input type="button" value="Cancel" id="btn-cancel-delete-group">
+                    <input type="submit" value="OK" id="btn-ok-delete-group">
+                </form>
             </div>
         </div>
     </div>

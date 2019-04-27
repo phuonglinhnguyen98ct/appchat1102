@@ -647,3 +647,21 @@ $(window).click((e) => {
         $(".edit-group").css('display', 'none');
     }
 });
+
+// Handle press delete group
+$(document).on('click', '#btn-delete-group', () => {
+    $(".delete-group-modal").css('display', 'block');
+
+});
+
+// Handle press cancel delete group
+$("#btn-cancel-delete-group").click(() => {
+    $(".delete-group-modal").css('display', 'none');
+});
+
+// Handle press outside delete group form to exit
+$(window).click((e) => {
+    if (e.target.className === 'delete-group-modal') {
+        $(".delete-group-modal").css('display', 'none');
+    }
+});

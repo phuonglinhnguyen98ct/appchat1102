@@ -56,11 +56,13 @@ router.post('/edit-group', async (req, res) => {
     let newUserInGroup = req.body.userInGroup;
     newUserInGroup.push(req.user.username);
     let oldUserInGroup;
+    let groupCreator;
 
     await Group.findOne({ _id: req.body.groupId }, (err, group) => {
         if (err) throw err;
         // Get old members
         oldUserInGroup = group.members.slice();
+        groupCreator = group.creator;
 
         // Change group's name
         if (req.body.groupName) {
@@ -72,38 +74,78 @@ router.post('/edit-group', async (req, res) => {
         group.save();
     });
 
-    // Delete old groupId when user leave group
-    await User.find({
-        $and: [
-            { username: { $in: oldUserInGroup } },
-            { username: { $nin: newUserInGroup } }]
-    }, (err, users) => {
-        if (err) throw err;
-        users.forEach(user => {
-            user.groupIds.forEach((groupId, index) => {
-                if (groupId == req.body.groupId) {
-                    // Delete groupId
-                    user.groupIds.splice(index, 1);
-                    user.save();
-                }
+    // Check user is creator
+    if (groupCreator === req.user.username) {
+        // Delete old groupId when user leave group
+        await User.find({
+            $and: [
+                { username: { $in: oldUserInGroup } },
+                { username: { $nin: newUserInGroup } }]
+        }, (err, users) => {
+            if (err) throw err;
+            users.forEach(user => {
+                user.groupIds.forEach((groupId, index) => {
+                    if (groupId == req.body.groupId) {
+                        // Delete groupId
+                        user.groupIds.splice(index, 1);
+                        user.save();
+                    }
+                });
             });
         });
-    });
 
-    // Insert groupId when user join in group
-    await User.find({
-        $and: [
-            { username: { $in: newUserInGroup } },
-            { username: { $nin: oldUserInGroup } }]
-    }, (err, users) => {
-        if (err) throw err;
-        users.forEach(user => {
-            user.groupIds.push(req.body.groupId);
-            user.save();
+        // Insert groupId when user join in group
+        await User.find({
+            $and: [
+                { username: { $in: newUserInGroup } },
+                { username: { $nin: oldUserInGroup } }]
+        }, (err, users) => {
+            if (err) throw err;
+            users.forEach(user => {
+                user.groupIds.push(req.body.groupId);
+                user.save();
+            });
         });
+    }
+
+
+
+
+    res.redirect('/chat');
+});
+
+// Delete group
+router.post('/delete-group', async (req, res) => {
+    let oldUserInGroup;
+    let groupCreator;
+
+    await Group.findOne({ _id: req.body.groupId }, (err, group) => {
+        if (err) throw err;
+        // Get old members
+        oldUserInGroup = group.members.slice();
+        groupCreator = group.creator;
     });
 
+    // Check user is creator
+    if (groupCreator === req.user.username) {
+        // Delete group
+        Group.deleteOne({ _id: req.body.groupId }, (err) => {
+            if (err) throw err;
+        });
 
+        // Delete groupId in User collection
+        await User.find({ username: { $in: oldUserInGroup } }, (err, users) => {
+            if (err) throw err;
+            users.forEach(user => {
+                user.groupIds.forEach((groupId, index) => {
+                    if (groupId == req.body.groupId) {
+                        user.groupIds.splice(index, 1);
+                        user.save();
+                    }
+                });
+            });
+        });
+    }
     res.redirect('/chat');
 });
 
