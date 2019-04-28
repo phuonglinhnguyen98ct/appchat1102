@@ -444,10 +444,10 @@ function chooseGroup(groupName, groupId, groupCreator, groupMembersString, eleme
 
     // Check user is group's creator
     if (username === groupCreator) {
-        $("#receiver-container").html(`<div>${groupName}<i class="fas fa-cog" id="btn-edit-group"></i></div><div class="group-id">ID: ${groupId}</div>`);
+        $("#receiver-container").html(`<div>${groupName}<i class="fas fa-cog" id="btn-edit-group" title="Edit group"></i></div><div class="group-id-received">ID: ${groupId}</div>`);
     }
     else {
-        $("#receiver-container").html(`<div>${groupName}</div><div class="group-id">ID: ${groupId}</div>`);
+        $("#receiver-container").html(`<div>${groupName}<i class="fas fa-users" id="btn-view-group-members" title="View group members"></i></div><div class="group-id-received">ID: ${groupId}</div>`);
     }
     
     // Insert groupId into edit group form
@@ -456,6 +456,13 @@ function chooseGroup(groupName, groupId, groupCreator, groupMembersString, eleme
     // Insert groupCreator into edit group form
     $(".group-creator").html(`<b>Creator:</b> ${groupCreator}`);
 
+    // Insert group members to view
+    $(".user-container-to-view").empty();
+    groupMembers.forEach(member => {
+        $(".user-container-to-view").append(`<div class="members-view">${member}</div>`);
+    });
+
+    // Change backgroud color when click on a group
     $(".online-user").removeClass("active");
     $(".chat-group").removeClass("active");
     $(element).addClass("active");
@@ -663,5 +670,22 @@ $("#btn-cancel-delete-group").click(() => {
 $(window).click((e) => {
     if (e.target.className === 'delete-group-modal') {
         $(".delete-group-modal").css('display', 'none');
+    }
+});
+
+// Handle press view group members
+$(document).on('click', '#btn-view-group-members', () => {
+    $(".view-group-members-modal").css('display', 'block');
+});
+
+// Handle press exit view group members
+$("#btn-exit-view-group-members").click(() => {
+    $(".view-group-members-modal").css('display', 'none');
+});
+
+// Handle press outside view group members form
+$(window).click((e) => {
+    if (e.target.className === 'view-group-members-modal') {
+        $(".view-group-members-modal").css('display', 'none');
     }
 });
