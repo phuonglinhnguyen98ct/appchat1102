@@ -8,11 +8,11 @@ router.get('/', (req, res) => {
     });
 });
 
-router.get('/video-call', (req, res) => {
-    res.render('video-call', {
-        user: req.user
-    })
-});
+// router.get('/video-call', (req, res) => {
+//     res.render('video-call', {
+//         user: req.user
+//     })
+// });
 
 router.post('/add-group', async (req, res) => {
     let userInGroup = req.body.userInGroup;
@@ -108,9 +108,6 @@ router.post('/edit-group', async (req, res) => {
         });
     }
 
-
-
-
     res.redirect('/chat');
 });
 
@@ -146,6 +143,33 @@ router.post('/delete-group', async (req, res) => {
             });
         });
     }
+    res.redirect('/chat');
+});
+
+// Leave group
+router.post('/leave-group', async (req, res) => {
+    // Delete userId in Group collection
+    await Group.findOne({ _id: req.body.groupId }, (err, group) => {
+        if (err) throw err;
+        group.members.forEach((member, index) => {
+            if (member == req.user.username) {
+                group.members.splice(index, 1);
+                group.save();
+            }
+        });
+    });
+
+    // Delete groupId in User collection
+    await User.findOne({ _id: req.user._id }, (err, user) => {
+        if (err) throw err;
+        user.groupIds.forEach((groupId, index) => {
+            if (groupId == req.body.groupId) {
+                user.groupIds.splice(index, 1);
+                user.save();
+            }
+        })
+    });
+
     res.redirect('/chat');
 });
 

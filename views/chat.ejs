@@ -88,7 +88,7 @@
         </div>
         <div class="edit-group">
             <div class="edit-group-container">
-                <div class="create-new-group-title">Edit group<i class="fas fa-trash-alt" id="btn-delete-group"></i>
+                <div class="create-new-group-title">Edit group<i class="fas fa-trash-alt" id="btn-delete-group" title="Delete group"></i>
                     <div class="group-creator"></div>
                 </div>
                 <div id="btn-exit-edit-group">&times;</div>
@@ -109,7 +109,8 @@
         </div>
         <div class="view-group-members-modal">
             <div class="view-group-members-container">
-                <div class="create-new-group-title">Group members
+                <div class="create-new-group-title">
+                    Group members<i class="fas fa-sign-out-alt" id="btn-leave-group" title="Leave group"></i>
                     <div class="group-creator"></div>
                 </div>
                 <div id="btn-exit-view-group-members">&times;</div>
@@ -126,6 +127,16 @@
                 </form>
             </div>
         </div>
+        <div class="leave-group-modal">
+                <div class="leave-group-container">
+                    <form action="/chat/leave-group" method="POST">
+                        <div class="delete-group-title">Are you sure you want to leave this group?</div>
+                        <input type="text" class="group-id" name="groupId">
+                        <input type="button" value="Cancel" id="btn-cancel-leave-group">
+                        <input type="submit" value="OK" id="btn-ok-leave-group">
+                    </form>
+                </div>
+            </div>
     </div>
     <script src="./javascript/chat.js"></script>
 </body>

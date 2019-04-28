@@ -689,3 +689,21 @@ $(window).click((e) => {
         $(".view-group-members-modal").css('display', 'none');
     }
 });
+
+// Handle press leave group
+$(document).on('click', '#btn-leave-group', () => {
+    $(".leave-group-modal").css('display', 'block');
+
+});
+
+// Handle press cancel delete group
+$("#btn-cancel-leave-group").click(() => {
+    $(".leave-group-modal").css('display', 'none');
+});
+
+// Handle press outside delete group form to exit
+$(window).click((e) => {
+    if (e.target.className === 'leave-group-modal') {
+        $(".leave-group-modal").css('display', 'none');
+    }
+});
