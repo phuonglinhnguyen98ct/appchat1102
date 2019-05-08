@@ -92,7 +92,7 @@ function socket(io) {
             users.forEach(user => {
                 if (user.username === data) {
                     user.socketId.forEach(id => {
-                        io.to(id).emit('your-friend-stop-typing');
+                        io.to(id).emit('your-friend-stop-typing', socket.username);
                     });
                 }
             });
@@ -324,6 +324,9 @@ function socket(io) {
                     users.splice(i, 1);
                 }
             })
+
+            // Send stop typing event
+            io.sockets.emit('your-friend-stop-typing', socket.username);
 
             // Send disconnect username
             io.sockets.emit('sever-send-disconnect-username', socket.username);

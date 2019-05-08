@@ -118,9 +118,11 @@ $('input[type=file]').change(function () {
 let showTypingStatusToFriend = false; // Typing status is showing to client's friend
 
 // Handle stop typing event
-socket.on('your-friend-stop-typing', () => {
-    if ($(".status-container").length > 0) {
-        $(".status-container").remove();
+socket.on('your-friend-stop-typing', data => {
+    if (data === receiver) {
+        if ($(".status-container").length > 0) {
+            $(".status-container").remove();
+        }
     }
 });
 
@@ -151,13 +153,6 @@ socket.on('your-friend-is-typing', data => {
 
         // Scroll to the bottom of message container 
         $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
-
-        // Set timeout (case client's friend log out...)
-        setTimeout(() => {
-            if ($(".status-container").length > 0) {
-                $(".status-container").remove();
-            }
-        }, 10000);
     }
 });
 
@@ -449,7 +444,7 @@ function chooseGroup(groupName, groupId, groupCreator, groupMembersString, eleme
     else {
         $("#receiver-container").html(`<div>${groupName}<i class="fas fa-users" id="btn-view-group-members" title="View group members"></i></div><div class="group-id-received">ID: ${groupId}</div>`);
     }
-    
+
     // Insert groupId into edit group form
     $(".group-id").val(groupId);
 
