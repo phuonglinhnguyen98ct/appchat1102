@@ -6,7 +6,7 @@ const messageSchema = new mongoose.Schema({
     receivedGroupId: String,
     message: String,
     file: String,
-    datetime: String,
+    datetime: Date,
     seen: Boolean
 });
 

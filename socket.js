@@ -110,13 +110,12 @@ function socket(io) {
         }
 
         // Get datetime string
-        function getDatetimeString() {
-            let now = new Date();
-            let dd = String(now.getDate()).padStart(2, '0');
-            let MM = String(now.getMonth() + 1).padStart(2, '0');
-            let yyyy = now.getFullYear();
-            let HH = String(now.getHours()).padStart(2, '0');
-            let mm = String(now.getMinutes()).padStart(2, '0');
+        function dateToString(date) {
+            let dd = String(date.getDate()).padStart(2, '0');
+            let MM = String(date.getMonth() + 1).padStart(2, '0');
+            let yyyy = date.getFullYear();
+            let HH = String(date.getHours()).padStart(2, '0');
+            let mm = String(date.getMinutes()).padStart(2, '0');
             let datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
 
             return datetime;
@@ -130,20 +129,21 @@ function socket(io) {
         // User send message to a friend
         socket.on('client-send-message', data => {
             // Get sent time
-            let datetime = getDatetimeString();
+            let datetime = new Date();
+            let datetimeString = dateToString(datetime);
 
             users.forEach(user => {
                 if (user.username === data.receiver) {
                     // Sending to receiver
                     user.socketId.forEach(id => {
-                        io.to(id).emit('client-receive-message', { sender: socket.username, message: data.message, datetime: datetime });
+                        io.to(id).emit('client-receive-message', { sender: socket.username, message: data.message, datetime: datetimeString });
                     });
                 }
                 // Send to other user's socketId 
                 if (user.username === socket.username) {
                     user.socketId.forEach(id => {
                         if (id !== socket.id) {
-                            io.to(id).emit('client-receive-message-from-their-socketids', { message: data.message, datetime: datetime });
+                            io.to(id).emit('client-receive-message-from-their-socketids', { message: data.message, datetime: datetimeString });
                         }
                     });
                 }
@@ -164,7 +164,8 @@ function socket(io) {
         // User send image to a friend
         socket.on('client-send-image', data => {
             // Get sent time
-            let datetime = getDatetimeString();
+            let datetime = new Date();
+            let datetimeString = dateToString(datetime);
 
             // Get send file
             let base64Image = data.file.toString('base64');
@@ -173,14 +174,14 @@ function socket(io) {
                 if (user.username === data.receiver) {
                     // Sending to receiver
                     user.socketId.forEach(id => {
-                        io.to(id).emit('client-receive-image', { sender: socket.username, file: base64Image, datetime: datetime });
+                        io.to(id).emit('client-receive-image', { sender: socket.username, file: base64Image, datetime: datetimeString });
                     });
                 }
                 // Send to other user's socketId 
                 if (user.username === socket.username) {
                     user.socketId.forEach(id => {
                         if (id !== socket.id) {
-                            io.to(id).emit('client-receive-image-from-their-socketids', { file: base64Image, datetime: datetime });
+                            io.to(id).emit('client-receive-image-from-their-socketids', { file: base64Image, datetime: datetimeString });
                         }
                     });
                 }
@@ -228,10 +229,11 @@ function socket(io) {
         // Client send message to group
         socket.on('client-send-message-to-group', data => {
             // Get sent time
-            let datetime = getDatetimeString();
+            let datetime = new Date();
+            let datetimeString = dateToString(datetime);
 
             // Send to room socketIO
-            socket.to(data.receivedGroupId).emit('client-receive-message-from-group', { sender: socket.username, receivedGroupId: data.receivedGroupId, message: data.message, datetime: datetime });
+            socket.to(data.receivedGroupId).emit('client-receive-message-from-group', { sender: socket.username, receivedGroupId: data.receivedGroupId, message: data.message, datetime: datetimeString });
 
             // Saving to MongoDB
             Message.create({
@@ -248,13 +250,14 @@ function socket(io) {
         // User send image to group
         socket.on('client-send-image-to-group', data => {
             // Get sent time
-            let datetime = getDatetimeString();
+            let datetime = new Date();
+            let datetimeString = dateToString(datetime);
 
             // Get send file
             let base64Image = data.file.toString('base64');
 
             // Send to room socketIO
-            socket.to(data.receivedGroupId).emit('client-receive-image-from-group', { sender: socket.username, receivedGroupId: data.receivedGroupId, file: base64Image, datetime: datetime });
+            socket.to(data.receivedGroupId).emit('client-receive-image-from-group', { sender: socket.username, receivedGroupId: data.receivedGroupId, file: base64Image, datetime: datetimeString });
 
             // Saving to MongoDB
             Message.create({

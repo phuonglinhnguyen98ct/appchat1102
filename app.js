@@ -11,7 +11,6 @@ const passport = require('passport');
 const methodOverride = require('method-override');
 
 // EJS
-//app.use(expressLayouts);
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.set('views', './views');

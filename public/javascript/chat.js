@@ -291,30 +291,43 @@ socket.on('client-receive-image-from-their-socketids', data => {
     $("#message-container").scrollTop($("#message-container")[0].scrollHeight);
 });
 
+// Get datetime string
+function dateToString(date) {
+    let dd = String(date.getDate()).padStart(2, '0');
+    let MM = String(date.getMonth() + 1).padStart(2, '0');
+    let yyyy = date.getFullYear();
+    let HH = String(date.getHours()).padStart(2, '0');
+    let mm = String(date.getMinutes()).padStart(2, '0');
+    let datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
+
+    return datetime;
+}
+
 // Load old message from server (with a friend)
 socket.on('server-send-old-message', data => {
     $("#message-container").empty();
     let seenStatus = false;
     data.forEach(message => {
+        let datetimeString = dateToString(new Date(message.datetime));
         if (message.sender === username) {
             // If message is a text
             if (message.message) {
-                $("#message-container").append(`<div class="send-message">${message.message}<div class="send-datetime">${message.datetime}</div></div>`);
+                $("#message-container").append(`<div class="send-message">${message.message}<div class="send-datetime">${datetimeString}</div></div>`);
             }
             // If message is a image
             else {
-                $("#message-container").append(`<div class="send-image"><img src="data:image/jpeg;base64,${message.file}"><div class="send-datetime">${message.datetime}</div></div>`);
+                $("#message-container").append(`<div class="send-image"><img src="data:image/jpeg;base64,${message.file}"><div class="send-datetime">${datetimeString}</div></div>`);
             }
             seenStatus = message.seen;
         }
         else {
             // If message is a text
             if (message.message) {
-                $("#message-container").append(`<div class="receive-message"><b>${message.sender}: </b>${message.message}<div class="receive-datetime">${message.datetime}</div></div>`);
+                $("#message-container").append(`<div class="receive-message"><b>${message.sender}: </b>${message.message}<div class="receive-datetime">${datetimeString}</div></div>`);
             }
             // If message is a image
             else {
-                $("#message-container").append(`<div class="receive-image"><div><img src="data:image/jpeg;base64,${message.file}"></div><div class="receive-datetime">${message.datetime}</div></div>`);
+                $("#message-container").append(`<div class="receive-image"><div><img src="data:image/jpeg;base64,${message.file}"></div><div class="receive-datetime">${datetimeString}</div></div>`);
             }
         }
     });
@@ -592,25 +605,26 @@ socket.on('server-send-old-message-with-group', data => {
     $("#message-container").empty();
     let seenStatus = false;
     data.forEach(message => {
+        let datetimeString = dateToString(new Date(message.datetime));
         if (message.sender === username) {
             // If message is a text
             if (message.message) {
-                $("#message-container").append(`<div class="send-message">${message.message}<div class="send-datetime">${message.datetime}</div></div>`);
+                $("#message-container").append(`<div class="send-message">${message.message}<div class="send-datetime">${datetimeString}</div></div>`);
             }
             // If message is a image
             else {
-                $("#message-container").append(`<div class="send-image"><img src="data:image/jpeg;base64,${message.file}"><div class="send-datetime">${message.datetime}</div></div>`);
+                $("#message-container").append(`<div class="send-image"><img src="data:image/jpeg;base64,${message.file}"><div class="send-datetime">${datetimeString}</div></div>`);
             }
             seenStatus = message.seen;
         }
         else {
             // If message is a text
             if (message.message) {
-                $("#message-container").append(`<div class="receive-message"><b>${message.sender}: </b>${message.message}<div class="receive-datetime">${message.datetime}</div></div>`);
+                $("#message-container").append(`<div class="receive-message"><b>${message.sender}: </b>${message.message}<div class="receive-datetime">${datetimeString}</div></div>`);
             }
             // If message is a image
             else {
-                $("#message-container").append(`<div class="receive-image"><div><div><b>${message.sender}: </b></div><img src="data:image/jpeg;base64,${message.file}"></div><div class="receive-datetime">${message.datetime}</div></div>`);
+                $("#message-container").append(`<div class="receive-image"><div><div><b>${message.sender}: </b></div><img src="data:image/jpeg;base64,${message.file}"></div><div class="receive-datetime">${datetimeString}</div></div>`);
             }
         }
     });
