@@ -18,14 +18,7 @@ router.post('/add-group', async (req, res) => {
     let userInGroup = req.body.userInGroup;
     userInGroup.push(req.user.username);
 
-    let now = new Date();
-    let dd = String(now.getDate()).padStart(2, '0');
-    let MM = String(now.getMonth() + 1).padStart(2, '0');
-    let yyyy = now.getFullYear();
-    let HH = String(now.getHours()).padStart(2, '0');
-    let mm = String(now.getMinutes()).padStart(2, '0');
-    // Get date time
-    let datetime = HH + ":" + mm + " " + dd + '/' + MM + '/' + yyyy;
+    let datetime = new Date();
 
     await Group.create({
         name: req.body.groupName,
@@ -173,17 +166,17 @@ router.post('/leave-group', async (req, res) => {
     res.redirect('/chat');
 });
 
-// router.post('/delete-all-groupId-in-user-model', (req, res) => {
-//     User.find({}, (err, users) => {
-//         if (err) throw err;
-//         let arr = [];
-//         users.forEach(user => {
-//             user.groupIds = arr;
-//             user.save();
-//         });
-//     });
-//     console.log("deleted all groupId in users model");
-//     res.redirect('/chat');
-// });
+router.post('/delete-all-groupId-in-user-model', (req, res) => {
+    User.find({}, (err, users) => {
+        if (err) throw err;
+        let arr = [];
+        users.forEach(user => {
+            user.groupIds = arr;
+            user.save();
+        });
+    });
+    console.log("deleted all groupId in users model");
+    res.redirect('/chat');
+});
 
 module.exports = router;

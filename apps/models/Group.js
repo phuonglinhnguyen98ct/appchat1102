@@ -4,7 +4,7 @@ const groupSchema = new mongoose.Schema({
     name: String,
     creator: String,
     members: Array,
-    datetime: String,
+    datetime: Date,
 });
 
 const Group = mongoose.model('group', groupSchema);
