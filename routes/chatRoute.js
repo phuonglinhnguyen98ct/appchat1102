@@ -166,17 +166,17 @@ router.post('/leave-group', async (req, res) => {
     res.redirect('/chat');
 });
 
-router.post('/delete-all-groupId-in-user-model', (req, res) => {
-    User.find({}, (err, users) => {
-        if (err) throw err;
-        let arr = [];
-        users.forEach(user => {
-            user.groupIds = arr;
-            user.save();
-        });
-    });
-    console.log("deleted all groupId in users model");
-    res.redirect('/chat');
-});
+// router.post('/delete-all-groupId-in-user-model', (req, res) => {
+//     User.find({}, (err, users) => {
+//         if (err) throw err;
+//         let arr = [];
+//         users.forEach(user => {
+//             user.groupIds = arr;
+//             user.save();
+//         });
+//     });
+//     console.log("deleted all groupId in users model");
+//     res.redirect('/chat');
+// });
 
 module.exports = router;
